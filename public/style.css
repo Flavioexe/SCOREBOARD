@@ -1,0 +1,229 @@
+body { 
+    background: transparent; 
+    margin: 0; 
+    padding-top: 40px; 
+    font-family: 'Segoe UI', sans-serif; 
+    display: flex; 
+    justify-content: center; 
+    width: 100%; 
+}
+
+#pl-wrapper { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    width: fit-content; 
+    transform: scale(1.5); 
+    transform-origin: top center; 
+}
+
+.main-row { 
+    display: flex; 
+    height: 60px; 
+    align-items: stretch; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    position: relative; 
+    overflow: hidden;   
+}
+
+.accent-bar { 
+    width: 8px; 
+    transition: background 0.5s; 
+}
+
+.name-box { 
+    display: flex; 
+    align-items: center; 
+    padding: 0 15px; 
+    color: white; 
+    font-size: 28px; 
+    font-weight: bold; 
+    min-width: 140px; 
+    transition: background 0.5s; 
+}
+
+.logo { 
+    height: 40px; 
+    width: 40px; 
+    object-fit: contain; 
+    margin: 0 10px; 
+}
+
+.score-box { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 140px; 
+    font-size: 35px; 
+    font-weight: 900; 
+    color: #3d195b; 
+    transition: background 0.5s; 
+}
+
+.timer-row { 
+    display: flex; 
+    justify-content: center; 
+    margin-top: 0; 
+}
+
+.timer-box { 
+    padding: 5px 25px; 
+    font-size: 24px; 
+    font-weight: bold; 
+    border-radius: 0 0 5px 5px; 
+    min-width: 100px; 
+    text-align: center; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+    transition: background 0.5s, color 0.5s, width 0.3s; 
+    white-space: nowrap; 
+    font-variant-numeric: tabular-nums; /* Evita vibrazioni e oscillazioni laterali dei numeri */
+}
+
+/* --- ICONE CARTELLINI ROSSI FISSI --- */
+.red-cards-container { 
+    display: flex; 
+    gap: 4px; 
+    margin: 0 8px; 
+    align-items: center; 
+}
+
+.red-card-icon { 
+    width: 12px; 
+    height: 18px; 
+    background-color: #ff0000; 
+    border-radius: 2px; 
+    border: 1px solid #660000; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6); 
+}
+
+/* --- ANIMAZIONE GOL (Stile Premier Festa) --- */
+.goal-overlay-hidden { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    z-index: 10; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 20px; 
+    opacity: 0; 
+    transform: translateY(-100%); 
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease; 
+}
+
+.goal-overlay-active { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    z-index: 10; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 20px; 
+    opacity: 1; 
+    transform: translateY(0); 
+    box-shadow: inset 0 0 30px rgba(255,255,255,0.4); 
+    animation: goalFlash 0.6s alternate infinite; 
+}
+
+@keyframes goalFlash { 
+    from { filter: brightness(1); } 
+    to { filter: brightness(1.3); } 
+}
+
+#goal-word { 
+    font-size: 38px; 
+    font-weight: 900; 
+    color: white; 
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.6); 
+    font-style: italic; 
+    letter-spacing: 2px; 
+}
+
+#goal-team { 
+    font-size: 38px; 
+    font-weight: 900; 
+    color: white; 
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.6); 
+}
+
+.goal-min { 
+    background: rgba(0,0,0,0.7); 
+    color: white; 
+    padding: 5px 12px; 
+    border-radius: 6px; 
+    font-size: 24px; 
+    font-weight: bold; 
+    border: 2px solid rgba(255,255,255,0.3); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+}
+
+/* --- ANIMAZIONE EVENTI (Fluida, Istituzionale senza Flash) --- */
+.event-overlay-hidden { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    z-index: 9; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; 
+    opacity: 0; 
+    transform: translateY(-100%); 
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease; 
+}
+
+.event-overlay-active { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    z-index: 9; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; 
+    opacity: 1; 
+    transform: translateY(0); 
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6); 
+}
+
+#event-type { 
+    font-size: 28px; 
+    font-weight: 900; 
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8); 
+    letter-spacing: 1px; 
+}
+
+#event-team { 
+    font-size: 28px; 
+    font-weight: 900; 
+    color: white; 
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.8); 
+}
+
+/* --- RECUPERO STRUTTURATO --- */
+.stoppage-time { 
+    color: #ff3333; 
+    font-size: 0.85em; 
+    margin-left: 8px; 
+    font-weight: 900; 
+    display: none; 
+}
+
+.stoppage-time.visible { 
+    display: inline-block; 
+    animation: slideInRecupero 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+}
+
+@keyframes slideInRecupero { 
+    from { opacity: 0; transform: translateX(-15px); } 
+    to { opacity: 1; transform: translateX(0); } 
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="pl-wrapper">
+        <div class="main-row" id="main-board">
+            
+            <div id="goal-banner" class="goal-overlay-hidden">
+                <span id="goal-word">GOAL</span>
+                <span id="goal-team">LIV</span>
+                <span id="goal-minute-display" class="goal-min">1'</span>
+            </div>
+
+            <div id="event-banner" class="event-overlay-hidden">
+                <span id="event-type">CARTELLINO</span>
+                <span id="event-team">LIV</span>
+            </div>
+
+            <div id="acc1" class="accent-bar"></div>
+            <div id="box-name1" class="name-box">
+                <img id="logo1" class="logo" src="">
+                <span id="txt-short1">LIV</span>
+                <div id="rc1" class="red-cards-container"></div>
+            </div>
+            
+            <div id="box-score" class="score-box">
+                <span id="s1">0</span> - <span id="s2">0</span>
+            </div>
+            
+            <div id="box-name2" class="name-box">
+                <div id="rc2" class="red-cards-container"></div>
+                <span id="txt-short2">WOL</span>
+                <img id="logo2" class="logo" src="">
+            </div>
+            <div id="acc2" class="accent-bar"></div>
+        </div>
+
+        <div class="timer-row">
+            <div id="box-timer" class="timer-box">
+                <span id="time-base">00:00</span><span id="time-extra" class="stoppage-time"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let prevScore1 = -1;
+        let prevScore2 = -1;
+        let footballMinute = "1'";
+        let lastEventId = null;
+        let targetMinute = 45;
+
+        socket.on('updateData', (d) => {
+            // Logica rilevamento gol
+            if (prevScore1 !== -1) {
+                if (parseInt(d.score1) > prevScore1) triggerGoalAnimation(1, d);
+                if (parseInt(d.score2) > prevScore2) triggerGoalAnimation(2, d);
+            }
+            prevScore1 = parseInt(d.score1); 
+            prevScore2 = parseInt(d.score2);
+
+            // Logica rilevamento eventi secondari (evitando doppie esecuzioni)
+            if (d.lastEvent && d.lastEvent.id !== lastEventId) {
+                if (lastEventId !== null) triggerMatchEvent(d.lastEvent.team, d.lastEvent.type, d);
+                lastEventId = d.lastEvent.id;
+            }
+
+            // Sincronizza il limite della fase attuale (45, 90, 105, 120)
+            targetMinute = parseInt(d.targetTime) || 45;
+
+            // Aggiorna scritte e punteggi
+            document.getElementById('txt-short1').innerText = d.short1; 
+            document.getElementById('txt-short2').innerText = d.short2;
+            document.getElementById('s1').innerText = d.score1; 
+            document.getElementById('s2').innerText = d.score2;
+            
+            // Gestione trasparenze Loghi PNG
+            const l1 = document.getElementById('logo1'); 
+            if(d.logo1) { l1.src = d.logo1; l1.style.display="block"; } else l1.style.display="none";
+            const l2 = document.getElementById('logo2'); 
+            if(d.logo2) { l2.src = d.logo2; l2.style.display="block"; } else l2.style.display="none";
+
+            // Sincronizzazione colori rettangoli personalizzabili
+            document.getElementById('box-name1').style.backgroundColor = d.colorNames; 
+            document.getElementById('box-name2').style.backgroundColor = d.colorNames;
+            document.getElementById('box-score').style.backgroundColor = d.colorScore; 
+            document.getElementById('box-timer').style.backgroundColor = d.colorTimerBg;
+            document.getElementById('box-timer').style.color = d.colorTimerText;
+            document.getElementById('acc1').style.background = `linear-gradient(to bottom, ${d.acc1a} 50%, ${d.acc1b} 50%)`;
+            document.getElementById('acc2').style.background = `linear-gradient(to bottom, ${d.acc2a} 50%, ${d.acc2b} 50%)`;
+
+            // Render dei cartellini rossi fissi sullo scoreboard
+            renderRedCards('rc1', d.red1 || 0); 
+            renderRedCards('rc2', d.red2 || 0);
+        });
+
+        socket.on('timerTick', (t) => {
+            let displayM = t.m;
+            let displayS = t.s;
+            let showExtra = false;
+
+            // LOGICA AVANZATA RECUPERO
+            if (t.m >= targetMinute) {
+                displayM = targetMinute; // Blocca il timer principale sulla soglia limite
+                displayS = 0;
+                
+                // Conteggia lo scarto del tempo di recupero
+                let overSeconds = (t.m - targetMinute) * 60 + t.s;
+                let overM = Math.floor(overSeconds / 60);
+                let overS = overSeconds % 60;
+                
+                let oMStr = overM < 10 ? "0"+overM : overM;
+                let oSStr = overS < 10 ? "0"+overS : overS;
+                
+                // Aggiorna esclusivamente il blocco di testo del recupero
+                document.getElementById('time-extra').innerText = `+ ${oMStr}:${oSStr}`;
+                showExtra = true;
+                footballMinute = targetMinute + "'+ " + (overM + 1) + "'"; 
+            } else {
+                footballMinute = (t.m + 1) + "'"; 
+            }
+
+            let mStr = displayM < 10 ? "0"+displayM : displayM;
+            let sStr = displayS < 10 ? "0"+displayS : displayS;
+            
+            document.getElementById('time-base').innerText = `${mStr}:${sStr}`;
+            
+            // Gestione dell'apparizione fluida senza distruggere i nodi HTML
+            const extraEl = document.getElementById('time-extra');
+            if (showExtra) {
+                if (!extraEl.classList.contains('visible')) extraEl.classList.add('visible');
+            } else {
+                extraEl.classList.remove('visible');
+            }
+        });
+
+        function triggerGoalAnimation(teamNum, d) {
+            const banner = document.getElementById('goal-banner');
+            document.getElementById('goal-team').innerText = teamNum === 1 ? d.short1 : d.short2;
+            document.getElementById('goal-minute-display').innerText = footballMinute;
+            banner.style.background = `linear-gradient(135deg, ${teamNum===1?d.acc1a:d.acc2a}, ${teamNum===1?d.acc1b:d.acc2b})`;
+            banner.className = "goal-overlay-active"; 
+            setTimeout(() => { banner.className = "goal-overlay-hidden"; }, 6000);
+        }
+
+        function triggerMatchEvent(teamNum, type, d) {
+            const banner = document.getElementById('event-banner'); 
+            const typeEl = document.getElementById('event-type');
+            document.getElementById('event-team').innerText = teamNum === 1 ? d.short1 : d.short2;
+            banner.style.background = `linear-gradient(135deg, ${teamNum===1?d.acc1a:d.acc2a}, ${teamNum===1?d.acc1b:d.acc2b})`;
+            
+            if (type === 'YELLOW') { typeEl.innerText = "CARTELLINO GIALLO"; typeEl.style.color = "#ffc107"; } 
+            else if (type === 'RED') { typeEl.innerText = "CARTELLINO ROSSO"; typeEl.style.color = "#ff4d4d"; } 
+            else if (type === 'SUB') { typeEl.innerText = "SOSTITUZIONE"; typeEl.style.color = "#00e6e6"; }
+            
+            banner.className = "event-overlay-active"; 
+            setTimeout(() => { banner.className = "event-overlay-hidden"; }, 5000);
+        }
+
+        function renderRedCards(containerId, count) {
+            const c = document.getElementById(containerId); 
+            c.innerHTML = '';
+            for(let i=0; i<count; i++){ 
+                const r = document.createElement('div'); 
+                r.className='red-card-icon'; 
+                c.appendChild(r); 
+            }
+        }
+    </script>
+</body>
+</html>
