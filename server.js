@@ -19,7 +19,7 @@ let timerInterval = null;
 let isTimerRunning = false;
 
 io.on('connection', (socket) => {
-    console.log('🟢 [CONNESSIONE] Una sorgente (Pannello o Overlay) si è collegata.');
+    console.log('🟢 [CONNESSIONE] Una sorgente si è collegata al cloud.');
     
     // Invia lo stato attuale appena una pagina viene aperta o ricaricata
     socket.emit('updateData', scoreboardData);
@@ -36,27 +36,15 @@ io.on('connection', (socket) => {
             
             timerMinutes = startMinute;
             timerSeconds = 0;
-            console.log(`🔄 [FASE] Nuova fase impostata: ${data.targetTime}'. Il timer si adatta a: ${timerMinutes}:00`);
             io.emit('timerTick', { m: timerMinutes, s: timerSeconds });
         }
 
         scoreboardData = data;
-        
-        // Stampa lo stato dei punti corrente nel terminale
-        console.log(`📊 [MATCH] ${data.short1} [${data.score1}] - [${data.score2}] ${data.short2}`);
-        
-        // Se c'è un evento speciale come cartellino o sostituzione, lo logga nel terminale
-        if (data.lastEvent) {
-            const teamLabel = data.lastEvent.team === 1 ? data.short1 : data.short2;
-            console.log(`⚠️ [REGIA] Animazione inviata -> Tipo: ${data.lastEvent.type} | Squadra: ${teamLabel}`);
-        }
-
         io.emit('updateData', scoreboardData);
     });
 
     socket.on('startTimer', () => {
         if (!isTimerRunning) {
-            console.log('▶️ [CRONOMETRO] Timer avviato.');
             isTimerRunning = true;
             timerInterval = setInterval(() => {
                 timerSeconds++;
@@ -71,14 +59,12 @@ io.on('connection', (socket) => {
 
     socket.on('pauseTimer', () => {
         if (isTimerRunning) {
-            console.log('⏸️ [CRONOMETRO] Timer in pausa.');
             isTimerRunning = false;
             clearInterval(timerInterval);
         }
     });
 
     socket.on('resetTimer', () => {
-        console.log('⏹️ [CRONOMETRO] Reset premuto.');
         isTimerRunning = false;
         clearInterval(timerInterval);
         
@@ -91,27 +77,19 @@ io.on('connection', (socket) => {
         
         timerMinutes = startMinute; 
         timerSeconds = 0;
-        console.log(`⏳ [CRONOMETRO] Timer ripristinato all'inizio della fase corrente: ${timerMinutes}:00`);
         io.emit('timerTick', { m: timerMinutes, s: timerSeconds });
     });
 
     socket.on('setTime', (minutes) => {
         timerMinutes = parseInt(minutes, 10) || 0;
         timerSeconds = 0;
-        console.log(`🔧 [CRONOMETRO] Modifica manuale: il tempo è stato forzato a: ${timerMinutes}:00`);
         io.emit('timerTick', { m: timerMinutes, s: timerSeconds });
-    });
-
-    socket.on('disconnect', () => {
-        console.log('🔴 [DISCONNESSIONE] Una sorgente si è disconnessa.');
     });
 });
 
-http.listen(3000, () => {
-    console.log('\n==================================================');
-    console.log('🚀 REGIA STREAMING PRO ACCESA ED OPERATIVA!');
-    console.log('==================================================');
-    console.log('👉 Pannello Controllo: http://localhost:3000/panel.html');
-    console.log('📺 Overlay Streamlabs: http://localhost:3000/overlay.html');
-    console.log('==================================================\n');
+// 🛠️ CONFIGURAZIONE PER SERVER PUBBLICO: 
+// Prende la porta assegnata automaticamente da Render, oppure la 3000 se testi in locale sul Mac
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+    console.log(`🚀 REGIA ONLINE SULLA PORTA ${PORT}!`);
 });
