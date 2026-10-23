@@ -45,6 +45,16 @@
         </div>
     </div>
 
+    <!-- SPONSOR -->
+    <div id="sponsor-banner" class="sponsor-hidden">
+        <img src="sponsors.png" alt="Sponsor Ufficiali">
+    </div>
+
+    <!-- FULLSCREEN -->
+    <div id="fullscreen-overlay" class="fullscreen-hidden">
+        <img id="fullscreen-img" src="" alt="Grafica Match">
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -55,7 +65,6 @@
         let targetMinute = 45;
 
         socket.on('updateData', (d) => {
-            // Logica rilevamento gol
             if (prevScore1 !== -1) {
                 if (parseInt(d.score1) > prevScore1) triggerGoalAnimation(1, d);
                 if (parseInt(d.score2) > prevScore2) triggerGoalAnimation(2, d);
@@ -63,28 +72,23 @@
             prevScore1 = parseInt(d.score1); 
             prevScore2 = parseInt(d.score2);
 
-            // Logica rilevamento eventi secondari (evitando doppie esecuzioni)
             if (d.lastEvent && d.lastEvent.id !== lastEventId) {
                 if (lastEventId !== null) triggerMatchEvent(d.lastEvent.team, d.lastEvent.type, d);
                 lastEventId = d.lastEvent.id;
             }
 
-            // Sincronizza il limite della fase attuale (45, 90, 105, 120)
             targetMinute = parseInt(d.targetTime) || 45;
 
-            // Aggiorna scritte e punteggi
             document.getElementById('txt-short1').innerText = d.short1; 
             document.getElementById('txt-short2').innerText = d.short2;
             document.getElementById('s1').innerText = d.score1; 
             document.getElementById('s2').innerText = d.score2;
             
-            // Gestione trasparenze Loghi PNG
             const l1 = document.getElementById('logo1'); 
             if(d.logo1) { l1.src = d.logo1; l1.style.display="block"; } else l1.style.display="none";
             const l2 = document.getElementById('logo2'); 
             if(d.logo2) { l2.src = d.logo2; l2.style.display="block"; } else l2.style.display="none";
 
-            // Sincronizzazione colori rettangoli personalizzabili
             document.getElementById('box-name1').style.backgroundColor = d.colorNames; 
             document.getElementById('box-name2').style.backgroundColor = d.colorNames;
             document.getElementById('box-score').style.backgroundColor = d.colorScore; 
@@ -93,9 +97,15 @@
             document.getElementById('acc1').style.background = `linear-gradient(to bottom, ${d.acc1a} 50%, ${d.acc1b} 50%)`;
             document.getElementById('acc2').style.background = `linear-gradient(to bottom, ${d.acc2a} 50%, ${d.acc2b} 50%)`;
 
-            // Render dei cartellini rossi fissi sullo scoreboard
             renderRedCards('rc1', d.red1 || 0); 
             renderRedCards('rc2', d.red2 || 0);
+        });
+
+        // ASCOLTATORE DEDICATO PER L'IMMAGINE FULLSCREEN
+        socket.on('updateFullscreenImage', (url) => {
+            if(url) {
+                document.getElementById('fullscreen-img').src = url;
+            }
         });
 
         socket.on('timerTick', (t) => {
@@ -103,12 +113,10 @@
             let displayS = t.s;
             let showExtra = false;
 
-            // LOGICA AVANZATA RECUPERO
             if (t.m >= targetMinute) {
-                displayM = targetMinute; // Blocca il timer principale sulla soglia limite
+                displayM = targetMinute;
                 displayS = 0;
                 
-                // Conteggia lo scarto del tempo di recupero
                 let overSeconds = (t.m - targetMinute) * 60 + t.s;
                 let overM = Math.floor(overSeconds / 60);
                 let overS = overSeconds % 60;
@@ -116,7 +124,6 @@
                 let oMStr = overM < 10 ? "0"+overM : overM;
                 let oSStr = overS < 10 ? "0"+overS : overS;
                 
-                // Aggiorna esclusivamente il blocco di testo del recupero
                 document.getElementById('time-extra').innerText = `+ ${oMStr}:${oSStr}`;
                 showExtra = true;
                 footballMinute = targetMinute + "'+ " + (overM + 1) + "'"; 
@@ -129,7 +136,6 @@
             
             document.getElementById('time-base').innerText = `${mStr}:${sStr}`;
             
-            // Gestione dell'apparizione fluida senza distruggere i nodi HTML
             const extraEl = document.getElementById('time-extra');
             if (showExtra) {
                 if (!extraEl.classList.contains('visible')) extraEl.classList.add('visible');
@@ -170,6 +176,31 @@
                 c.appendChild(r); 
             }
         }
+
+        let sponsorTimeout = null;
+        socket.on('showSponsor', () => {
+            const banner = document.getElementById('sponsor-banner');
+            banner.classList.remove('sponsor-hidden');
+            banner.classList.add('sponsor-visible');
+            if (sponsorTimeout) clearTimeout(sponsorTimeout);
+            sponsorTimeout = setTimeout(() => {
+                banner.classList.remove('sponsor-visible');
+                banner.classList.add('sponsor-hidden');
+            }, 20000);
+        });
+
+        socket.on('updateFullscreen', (show) => {
+            const fs = document.getElementById('fullscreen-overlay');
+            if (show) {
+                fs.classList.remove('fullscreen-hidden');
+                fs.classList.add('fullscreen-visible');
+            } else {
+                fs.classList.remove('fullscreen-visible');
+                fs.classList.add('fullscreen-hidden');
+            }
+        });
     </script>
+</body>
+</html>
 </body>
 </html>
