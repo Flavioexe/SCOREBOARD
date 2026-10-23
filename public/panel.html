@@ -135,7 +135,7 @@
             </div>
 
             <div style="border-top: 1px solid #444; padding-top: 15px;">
-                <label style="color:#00ff88; margin-bottom: 5px; display: block;">Immagine Fullscreen (Seleziona da telefono/PC)</label>
+                <label style="color:#00ff88; margin-bottom: 5px; display: block;">Immagine Fullscreen (Seleziona da telefono)</label>
                 <div style="display: flex; gap: 10px;">
                     <input type="file" accept="image/*" id="fullscreenInput" style="flex: 2;">
                     <button onclick="processFullscreen()" style="background:#2980b9; flex: 1;">CARICA</button>
@@ -150,13 +150,14 @@
     <script>
         const socket = io();
         let logo1 = "", logo2 = "";
+        let fullscreenImgData = ""; // Variabile per salvare stabilmente l'immagine
         let isFullscreenActive = false;
         
         let data = {
             short1: "LIV", score1: 0, acc1a: "#e31b23", acc1b: "#ffffff", logo1: "", red1: 0,
             short2: "WOL", score2: 0, acc2a: "#fdb913", acc2b: "#231f20", logo2: "", red2: 0,
             colorNames: "#ffffff", colorScore: "#00ff88", colorTimerBg: "#ffffff", colorTimerText: "#000000",
-            targetTime: "45", lastEvent: null
+            targetTime: "45", lastEvent: null, fullscreenUrl: ""
         };
 
         socket.on('updateData', (serverData) => {
@@ -172,6 +173,10 @@
             document.getElementById('colorTimerBg').value = data.colorTimerBg;
             document.getElementById('colorTimerText').value = data.colorTimerText;
             document.getElementById('targetTime').value = data.targetTime;
+            if (data.fullscreenUrl) {
+                fullscreenImgData = data.fullscreenUrl;
+                document.getElementById('btn-fullscreen').style.display = 'block';
+            }
         });
 
         function compressImage(file, isLogo, callback) {
@@ -194,14 +199,10 @@
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
-                    
-                    // 🛠️ PULIZIA FORZATA: Cancella qualsiasi residuo di colore nello sfondo rendendolo 100% trasparente
                     ctx.clearRect(0, 0, width, height);
-                    
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Restituisce sempre in formato PNG per preservare la trasparenza perfetta dei loghi
-                    callback(canvas.toDataURL('image/png'));
+                    callback(canvas.toDataURL('image/jpeg', 0.85));
                 };
                 img.src = e.target.result;
             };
@@ -217,16 +218,15 @@
             }
         }
 
-        // CARICAMENTO DEDICATO E DIRETTO SUL CANALE FULLSCREEN
         function processFullscreen() {
             const input = document.getElementById('fullscreenInput');
             if(input.files[0]) {
-                alert("Elaborazione e compressione immagine in corso... Un attimo di pazienza.");
+                alert("Elaborazione e compressione immagine in corso...");
                 compressImage(input.files[0], false, (compressed) => {
-                    // Spedisce l'immagine direttamente tramite il canale dedicato
-                    socket.emit('setFullscreenImage', compressed);
+                    fullscreenImgData = compressed;
                     document.getElementById('btn-fullscreen').style.display = 'block'; 
-                    alert("Immagine caricata con successo e pronta per andare in onda!");
+                    sendData(); // Salva permanentemente nel server
+                    alert("Immagine caricata con successo e sincronizzata con Streamlabs!");
                 });
             } else {
                 alert("Seleziona prima un'immagine dal telefono!");
@@ -285,6 +285,8 @@
             data.colorTimerText = document.getElementById('colorTimerText').value;
             data.targetTime = document.getElementById('targetTime').value;
             
+            data.fullscreenUrl = fullscreenImgData; // Inserito nel flusso ufficiale dei dati
+
             socket.emit('updateScoreboard', data);
         }
     </script>
