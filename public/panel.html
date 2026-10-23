@@ -178,7 +178,8 @@
                 document.getElementById('btn-fullscreen').style.display = 'block';
             }
         });
-function compressImage(file, isLogo, callback) {
+// 🛠️ DOPPIO MOTORE SEPARATO: PNG trasparente per i loghi, JPEG super leggero per il Fullscreen
+        function compressImage(file, isLogo, callback) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -199,17 +200,101 @@ function compressImage(file, isLogo, callback) {
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     
-                    // 🛠️ FONDAMENTALE: Pulisce il canvas rendendo lo sfondo trasparente
-                    ctx.clearRect(0, 0, width, height);
-                    
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // 🛠️ FONDAMENTALE: Usa PNG per mantenere la trasparenza del logo
-                    callback(canvas.toDataURL('image/png'));
+                    if (isLogo) {
+                        // Per i loghi puliamo lo sfondo e usiamo PNG (trasparenza perfetta)
+                        ctx.clearRect(0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, width, height);
+                        callback(canvas.toDataURL('image/png'));
+                    } else {
+                        // Per il Fullscreen usiamo JPEG al 85% (leggerissimo, si carica in un attimo e non crasha mai)
+                        ctx.drawImage(img, 0, 0, width, height);
+                        callback(canvas.toDataURL('image/jpeg', 0.85));
+                    }
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        function uploadLogo(team, input) {
+            if(input.files[0]) {
+                compressImage(input.files[0], true, (compressed) => {
+                    if(team === 1) logo1 = compressed; else logo2 = compressed;
+                    sendData();
+                });
+            }
+        }
+
+        function processFullscreen() {
+            const input = document.getElementById('fullscreenInput');
+            if(input.files[0]) {
+                alert("Elaborazione immagine fullscreen in corso...");
+                compressImage(input.files[0], false, (compressed) => {
+                    fullscreenImgData = compressed;
+                    document.getElementById('btn-fullscreen').style.display = 'block'; 
+                    sendData(); // Sincronizza istantaneamente con il server/Streamlabs
+                    alert("Immagine fullscreen pronta e sincronizzata!");
+                });
+            } else {
+                alert("Seleziona prima un'immagine dal telefono!");
+            }
+        }
+
+        function updateScore(t, v) {
+            if(t===1) data.score1 = Math.max(0, data.score1 + v);
+            else data.score2 = Math.max(0, data.score2 + v);
+            sendData();
+        }
+
+        function addRedCard(team) {
+            if(team === 1) data.red1++; else data.red2++;
+            fireMatchEvent(team, 'RED');
+        }
+        
+        function removeRedCard(team) {
+            if(team === 1) data.red1 = Math.max(0, data.red1 - 1); else data.red2 = Math.max(0, data.red2 - 1);
+            sendData();
+        }
+
+        function fireMatchEvent(team, type) {
+            data.lastEvent = { type: type, team: team, id: Date.now() };
+            sendData();
+        }
+
+        function toggleFullscreen() {
+            isFullscreenActive = !isFullscreenActive;
+            const btn = document.getElementById('btn-fullscreen');
+            
+            if (isFullscreenActive) {
+                btn.innerText = "❌ NASCONDI";
+                btn.style.background = "#27ae60";
+            } else {
+                btn.innerText = "🖼️ MOSTRA A TUTTO SCHERMO";
+                btn.style.background = "#e74c3c";
+            }
+            socket.emit('toggleFullscreen', isFullscreenActive);
+        }
+
+        function sendData() {
+            data.short1 = document.getElementById('short1').value.toUpperCase(); 
+            data.acc1a = document.getElementById('acc1a').value; 
+            data.acc1b = document.getElementById('acc1b').value; 
+            if(logo1) data.logo1 = logo1;
+            
+            data.short2 = document.getElementById('short2').value.toUpperCase(); 
+            data.acc2a = document.getElementById('acc2a').value; 
+            data.acc2b = document.getElementById('acc2b').value; 
+            if(logo2) data.logo2 = logo2;
+            
+            data.colorNames = document.getElementById('colorNames').value; 
+            data.colorScore = document.getElementById('colorScore').value; 
+            data.colorTimerBg = document.getElementById('colorTimerBg').value; 
+            data.colorTimerText = document.getElementById('colorTimerText').value;
+            data.targetTime = document.getElementById('targetTime').value;
+            
+            data.fullscreenUrl = fullscreenImgData; 
+
+            socket.emit('updateScoreboard', data);
         }
 
         function uploadLogo(team, input) {
