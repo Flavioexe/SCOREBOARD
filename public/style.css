@@ -1,11 +1,13 @@
 body { 
     background: transparent; 
     margin: 0; 
-    padding-top: 40px; 
+    padding-top: 30px; /* Leggermente ridotto per stare bene in alto */
+    padding-left: 30px; /* Aggiunto per staccarlo dal bordo sinistro */
     font-family: 'Segoe UI', sans-serif; 
     display: flex; 
-    justify-content: center; 
+    justify-content: flex-start; /* Allineato a sinistra (prima era center) */
     width: 100%; 
+    box-sizing: border-box;
 }
 
 #pl-wrapper { 
@@ -13,8 +15,8 @@ body {
     flex-direction: column; 
     align-items: center; 
     width: fit-content; 
-    transform: scale(1.5); 
-    transform-origin: top center; 
+    transform: scale(1.1); /* Rimpicciolito (prima era 1.5) */
+    transform-origin: top left; /* Modificato per rimpicciolirsi verso l'angolo */
 }
 
 .main-row { 
@@ -35,7 +37,7 @@ body {
     display: flex; 
     align-items: center; 
     padding: 0 15px; 
-    color: white; 
+    color: #000000; /* Modificato in NERO (prima era white) */
     font-size: 28px; 
     font-weight: bold; 
     min-width: 140px; 
@@ -56,7 +58,7 @@ body {
     width: 140px; 
     font-size: 35px; 
     font-weight: 900; 
-    color: #3d195b; 
+    color: #000000; /* Modificato in NERO (prima era #3d195b) */
     transition: background 0.5s; 
 }
 
@@ -76,7 +78,7 @@ body {
     box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
     transition: background 0.5s, color 0.5s, width 0.3s; 
     white-space: nowrap; 
-    font-variant-numeric: tabular-nums; /* Evita vibrazioni e oscillazioni laterali dei numeri */
+    font-variant-numeric: tabular-nums; 
 }
 
 /* --- ICONE CARTELLINI ROSSI FISSI --- */
@@ -226,4 +228,71 @@ body {
 @keyframes slideInRecupero { 
     from { opacity: 0; transform: translateX(-15px); } 
     to { opacity: 1; transform: translateX(0); } 
+}
+
+
+/* ==========================================
+   NUOVO: BANNER SPONSOR (Basso a Destra)
+   ========================================== */
+#sponsor-banner {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    max-width: 700px; /* Grandezza aumentata per dare impatto */
+    z-index: 998;
+    background: transparent; /* Sfondo 100% trasparente per i tuoi PNG */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+}
+
+#sponsor-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: transparent;
+    filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.4));
+}
+
+.sponsor-hidden {
+    transform: translateX(120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sponsor-visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* ==========================================
+   GRAFICA FULLSCREEN
+   ========================================== */
+#fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#fullscreen-overlay img {
+    width: 100vw;   /* MODIFICA: Riempie tutta la larghezza */
+    height: 100vh;  /* MODIFICA: Riempie tutta l'altezza */
+    object-fit: cover; /* MODIFICA: Espande l'immagine coprendo tutto lo schermo senza bande nere */
+}
+
+.fullscreen-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.fullscreen-visible {
+    opacity: 1;
+    visibility: visible;
 }
