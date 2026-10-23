@@ -10,7 +10,8 @@ let scoreboardData = {
     short2: "WOL", score2: 0, acc2a: "#fdb913", acc2b: "#231f20", logo2: "", red2: 0,
     colorNames: "#ffffff", colorScore: "#00ff88", colorTimerBg: "#ffffff", 
     colorTimerText: "#000000",
-    targetTime: "45", lastEvent: null
+    targetTime: "45", lastEvent: null,
+    fullscreenUrl: "" // <--- INCLUSO NELLO STATO GLOBALE
 };
 
 let timerMinutes = 0;
@@ -85,11 +86,6 @@ io.on('connection', (socket) => {
 
     socket.on('triggerSponsor', () => {
         io.emit('showSponsor');
-    });
-
-    // CANALE DEDICATO FULLSCREEN (Più robusto e veloce)
-    socket.on('setFullscreenImage', (imageUrl) => {
-        io.emit('updateFullscreenImage', imageUrl);
     });
 
     socket.on('toggleFullscreen', (show) => {
