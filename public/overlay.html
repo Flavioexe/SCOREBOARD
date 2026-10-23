@@ -99,12 +99,10 @@
 
             renderRedCards('rc1', d.red1 || 0); 
             renderRedCards('rc2', d.red2 || 0);
-        });
 
-        // ASCOLTATORE DEDICATO PER L'IMMAGINE FULLSCREEN
-        socket.on('updateFullscreenImage', (url) => {
-            if(url) {
-                document.getElementById('fullscreen-img').src = url;
+            // GESTIONE FULLSCREEN INTEGRATA NEL PACCHETTO DATI PRINCIPALE
+            if (d.fullscreenUrl) {
+                document.getElementById('fullscreen-img').src = d.fullscreenUrl;
             }
         });
 
@@ -200,7 +198,5 @@
             }
         });
     </script>
-</body>
-</html>
 </body>
 </html>
