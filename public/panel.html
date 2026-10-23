@@ -2,37 +2,40 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Regia Scoreboard - Premier Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pannello Regia</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: white; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #333; }
-        h3 { color: #00ff88; margin-top: 0; font-size: 14px; text-transform: uppercase; }
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #fff; padding: 20px; margin: 0; }
+        .card { background: #222; border-radius: 8px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); margin-bottom: 20px;}
+        .flex-container { display: flex; gap: 20px; flex-wrap: wrap; }
+        .flex-container > .card { flex: 1; min-width: 300px; }
+        h3 { margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; color: #fff; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 4px; }
-        input[type="text"], input[type="file"] { width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; text-transform: uppercase; }
+        input[type="text"], input[type="number"], select, input[type="file"] { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
+        input[type="color"] { width: 100%; height: 35px; border: none; padding: 0; cursor: pointer; }
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input[type="color"] { width: 100%; height: 35px; border: none; cursor: pointer; background: none; }
-        .btn-row { display: flex; gap: 5px; margin-top: 10px; }
-        button { flex: 1; padding: 10px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; color: white; text-transform: uppercase; font-size: 12px; }
-        .btn-plus { background: #28a745; } .btn-minus { background: #555; }
-        .timer-ctrl { background: #444; padding: 15px; text-align: center; margin-top: 20px; border-radius: 8px; }
-        .event-btn { padding: 8px; font-size: 11px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 5px; }
+        button { flex: 1; padding: 10px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; color: white; transition: opacity 0.2s; }
+        button:active { opacity: 0.8; }
+        .btn-minus { background: #dc3545; }
+        .btn-plus { background: #28a745; }
+        .event-btn { padding: 8px; font-size: 13px; border-radius: 4px; font-weight: bold; border: none; cursor: pointer; color: white; width: 100%;}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 style="text-align: center; letter-spacing: 2px;">PREMIER LEAGUE STYLE CONTROL</h2>
-        
-        <div class="grid">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <h2 style="text-align: center; color: #00ff88;">⚽ PANNELLO REGIA</h2>
+
+        <div class="flex-container">
+            <!-- SQUADRA CASA -->
             <div class="card">
                 <h3>🏠 CASA (Sinistra)</h3>
                 <div class="form-group"><label>Nome Abbreviato</label><input type="text" id="short1" value="LIV" maxlength="3" oninput="sendData()"></div>
                 <div class="form-group"><label>Strisce Accento (2 Colori)</label>
                     <div class="color-grid"><input type="color" id="acc1a" value="#e31b23" onchange="sendData()"><input type="color" id="acc1b" value="#ffffff" onchange="sendData()"></div>
                 </div>
-                <div class="form-group"><label>Logo PNG Trasparente</label><input type="file" onchange="uploadLogo(1, this)"></div>
+                <div class="form-group"><label>Logo PNG</label><input type="file" accept="image/*" onchange="uploadLogo(1, this)"></div>
                 
                 <div class="form-group" style="border-top: 1px solid #444; padding-top: 10px; margin-top: 15px;">
                     <label style="color:#00ff88;">⚽ Gestione Reti</label>
@@ -49,17 +52,18 @@
                         <button class="event-btn" style="background:#dc3545;" onclick="addRedCard(1)">🟥 Rosso</button>
                         <button class="event-btn" style="background:#17a2b8;" onclick="fireMatchEvent(1, 'SUB')">🔄 Cambio</button>
                     </div>
-                    <button class="event-btn" style="background: transparent; border: 1px dashed #666; width: 100%; margin-top: 5px;" onclick="removeRedCard(1)">Togli Cartellino Rosso</button>
+                    <button class="event-btn" style="background: transparent; border: 1px dashed #666; margin-top: 5px;" onclick="removeRedCard(1)">Togli Cartellino Rosso</button>
                 </div>
             </div>
 
+            <!-- SQUADRA OSPITI -->
             <div class="card">
                 <h3>✈️ OSPITI (Destra)</h3>
                 <div class="form-group"><label>Nome Abbreviato</label><input type="text" id="short2" value="WOL" maxlength="3" oninput="sendData()"></div>
                 <div class="form-group"><label>Strisce Accento (2 Colori)</label>
                     <div class="color-grid"><input type="color" id="acc2a" value="#fdb913" onchange="sendData()"><input type="color" id="acc2b" value="#231f20" onchange="sendData()"></div>
                 </div>
-                <div class="form-group"><label>Logo PNG Trasparente</label><input type="file" onchange="uploadLogo(2, this)"></div>
+                <div class="form-group"><label>Logo PNG</label><input type="file" accept="image/*" onchange="uploadLogo(2, this)"></div>
                 
                 <div class="form-group" style="border-top: 1px solid #444; padding-top: 10px; margin-top: 15px;">
                     <label style="color:#00ff88;">⚽ Gestione Reti</label>
@@ -76,7 +80,7 @@
                         <button class="event-btn" style="background:#dc3545;" onclick="addRedCard(2)">🟥 Rosso</button>
                         <button class="event-btn" style="background:#17a2b8;" onclick="fireMatchEvent(2, 'SUB')">🔄 Cambio</button>
                     </div>
-                    <button class="event-btn" style="background: transparent; border: 1px dashed #666; width: 100%; margin-top: 5px;" onclick="removeRedCard(2)">Togli Cartellino Rosso</button>
+                    <button class="event-btn" style="background: transparent; border: 1px dashed #666; margin-top: 5px;" onclick="removeRedCard(2)">Togli Cartellino Rosso</button>
                 </div>
             </div>
         </div>
@@ -84,10 +88,10 @@
         <div class="card" style="margin-top:20px;">
             <h3>🎨 COLORI RETTANGOLI SCOREBOARD</h3>
             <div class="color-grid" style="grid-template-columns: repeat(4, 1fr);">
-                <div><label>Sfondo Nomi</label><input type="color" id="colorNames" value="#3d195b" onchange="sendData()"></div>
+                <div><label>Sfondo Nomi</label><input type="color" id="colorNames" value="#ffffff" onchange="sendData()"></div>
                 <div><label>Sfondo Punti</label><input type="color" id="colorScore" value="#00ff88" onchange="sendData()"></div>
                 <div><label>Sfondo Timer</label><input type="color" id="colorTimerBg" value="#ffffff" onchange="sendData()"></div>
-                <div><label>Testo Timer</label><input type="color" id="colorTimerText" value="#3d195b" onchange="sendData()"></div>
+                <div><label>Testo Timer (Nero)</label><input type="color" id="colorTimerText" value="#000000" onchange="sendData()"></div>
             </div>
         </div>
 
@@ -96,8 +100,8 @@
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
                 <div>
-                    <label style="color:#00ff88; margin-bottom: 5px; display: block;">Fase della Partita (Allineamento automatico)</label>
-                    <select id="targetTime" onchange="sendData()" style="width: 100%; padding: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 4px; font-weight: bold;">
+                    <label style="color:#00ff88; margin-bottom: 5px;">Fase della Partita</label>
+                    <select id="targetTime" onchange="sendData()" style="font-weight: bold;">
                         <option value="45">Primo Tempo (Stop a 45')</option>
                         <option value="90">Secondo Tempo (Stop a 90')</option>
                         <option value="105">1° Supplementare (Stop a 105')</option>
@@ -106,10 +110,10 @@
                 </div>
 
                 <div>
-                    <label style="color:#00ff88; margin-bottom: 5px; display: block;">Imposta Minuto Manuale</label>
+                    <label style="color:#00ff88; margin-bottom: 5px;">Imposta Minuto Manuale</label>
                     <div style="display: flex; gap: 5px;">
-                        <input type="number" id="manualMinute" value="45" style="width: 80px; text-align: center; background:#222; color:white; border:1px solid #444; border-radius:4px;">
-                        <button onclick="socket.emit('setTime', document.getElementById('manualMinute').value)" style="background: #17a2b8; padding: 10px; font-size: 14px;">IMPOSTA</button>
+                        <input type="number" id="manualMinute" value="45" style="width: 80px; text-align: center;">
+                        <button onclick="socket.emit('setTime', document.getElementById('manualMinute').value)" style="background: #17a2b8; padding: 10px;">IMPOSTA</button>
                     </div>
                 </div>
             </div>
@@ -120,17 +124,38 @@
                 <button onclick="socket.emit('resetTimer')" style="background:#dc3545; font-size:16px;">⏹ RESET</button>
             </div>
         </div>
+
+        <!-- SEZIONE SPONSOR E FULLSCREEN -->
+        <div class="card" style="margin-top:20px; background: #1a1a1a;">
+            <h3 style="text-align: center;">📢 EXTRA E GRAFICHE MATCH</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="color:#e67e22; margin-bottom: 5px; display: block; text-align: center;">Richiede l'immagine "sponsors.png" nella cartella public</label>
+                <button onclick="socket.emit('triggerSponsor')" style="background:#e67e22; padding:12px; font-size:16px; width: 100%;">💸 MOSTRA SPONSOR (20 sec)</button>
+            </div>
+
+            <div style="border-top: 1px solid #444; padding-top: 15px;">
+                <label style="color:#00ff88; margin-bottom: 5px; display: block;">Immagine Fullscreen (Seleziona da telefono/PC)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="file" accept="image/*" id="fullscreenInput" style="flex: 2;">
+                    <button onclick="processFullscreen()" style="background:#2980b9; flex: 1;">CARICA</button>
+                </div>
+                <button id="btn-fullscreen" onclick="toggleFullscreen()" style="background:#e74c3c; width: 100%; margin-top: 10px; font-size: 16px; display: none;">🖼️ MOSTRA A TUTTO SCHERMO</button>
+            </div>
+        </div>
+
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let logo1 = "", logo2 = "";
+        let isFullscreenActive = false;
         
         let data = {
             short1: "LIV", score1: 0, acc1a: "#e31b23", acc1b: "#ffffff", logo1: "", red1: 0,
             short2: "WOL", score2: 0, acc2a: "#fdb913", acc2b: "#231f20", logo2: "", red2: 0,
-            colorNames: "#3d195b", colorScore: "#00ff88", colorTimerBg: "#ffffff", colorTimerText: "#3d195b",
+            colorNames: "#ffffff", colorScore: "#00ff88", colorTimerBg: "#ffffff", colorTimerText: "#000000",
             targetTime: "45", lastEvent: null
         };
 
@@ -149,13 +174,63 @@
             document.getElementById('targetTime').value = data.targetTime;
         });
 
-        function uploadLogo(team, input) {
+        function compressImage(file, isLogo, callback) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                if(team === 1) logo1 = e.target.result; else logo2 = e.target.result;
-                sendData();
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxW = isLogo ? 200 : 1280;
+                    const maxH = isLogo ? 200 : 720;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxW) { height *= maxW / width; width = maxW; }
+                    } else {
+                        if (height > maxH) { width *= maxH / height; height = maxH; }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 🛠️ PULIZIA FORZATA: Cancella qualsiasi residuo di colore nello sfondo rendendolo 100% trasparente
+                    ctx.clearRect(0, 0, width, height);
+                    
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Restituisce sempre in formato PNG per preservare la trasparenza perfetta dei loghi
+                    callback(canvas.toDataURL('image/png'));
+                };
+                img.src = e.target.result;
             };
-            if(input.files[0]) reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
+        }
+
+        function uploadLogo(team, input) {
+            if(input.files[0]) {
+                compressImage(input.files[0], true, (compressed) => {
+                    if(team === 1) logo1 = compressed; else logo2 = compressed;
+                    sendData();
+                });
+            }
+        }
+
+        // CARICAMENTO DEDICATO E DIRETTO SUL CANALE FULLSCREEN
+        function processFullscreen() {
+            const input = document.getElementById('fullscreenInput');
+            if(input.files[0]) {
+                alert("Elaborazione e compressione immagine in corso... Un attimo di pazienza.");
+                compressImage(input.files[0], false, (compressed) => {
+                    // Spedisce l'immagine direttamente tramite il canale dedicato
+                    socket.emit('setFullscreenImage', compressed);
+                    document.getElementById('btn-fullscreen').style.display = 'block'; 
+                    alert("Immagine caricata con successo e pronta per andare in onda!");
+                });
+            } else {
+                alert("Seleziona prima un'immagine dal telefono!");
+            }
         }
 
         function updateScore(t, v) {
@@ -177,6 +252,20 @@
         function fireMatchEvent(team, type) {
             data.lastEvent = { type: type, team: team, id: Date.now() };
             sendData();
+        }
+
+        function toggleFullscreen() {
+            isFullscreenActive = !isFullscreenActive;
+            const btn = document.getElementById('btn-fullscreen');
+            
+            if (isFullscreenActive) {
+                btn.innerText = "❌ NASCONDI";
+                btn.style.background = "#27ae60";
+            } else {
+                btn.innerText = "🖼️ MOSTRA A TUTTO SCHERMO";
+                btn.style.background = "#e74c3c";
+            }
+            socket.emit('toggleFullscreen', isFullscreenActive);
         }
 
         function sendData() {
