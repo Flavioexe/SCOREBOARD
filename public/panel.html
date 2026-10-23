@@ -178,8 +178,7 @@
                 document.getElementById('btn-fullscreen').style.display = 'block';
             }
         });
-
-        function compressImage(file, isLogo, callback) {
+function compressImage(file, isLogo, callback) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -199,10 +198,14 @@
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
+                    
+                    // 🛠️ FONDAMENTALE: Pulisce il canvas rendendo lo sfondo trasparente
                     ctx.clearRect(0, 0, width, height);
+                    
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    callback(canvas.toDataURL('image/jpeg', 0.85));
+                    // 🛠️ FONDAMENTALE: Usa PNG per mantenere la trasparenza del logo
+                    callback(canvas.toDataURL('image/png'));
                 };
                 img.src = e.target.result;
             };
